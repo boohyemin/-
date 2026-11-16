@@ -272,7 +272,7 @@ const BUDGET = 100;
 const CRISIS = -150;       // 이 이하 악재는 '긴급 대응' 선택 발생
 const C_COST = 45;         // 긴급 대응 비용(억)
 const C_CUT = 0.3;         // 긴급 대응 시 남은 피해 추가 감소율
-const T_ALLOC = 30, T_CRISIS = 10, T_TOPUP = 20; // 제한 시간(초)
+const T_ALLOC = 30, T_CRISIS = 30, T_TOPUP = 20; // 제한 시간(초)
 const AREAS = ['E','S','G'];
 const AREA = {
   E:{name:'환경 E', color:'#5fd38a', desc:'탄소세·가뭄·폐수 사고를 막고, 친환경 이슈 때 수혜'},
@@ -663,10 +663,11 @@ function topup(){
     const draw = () => {
       const t = p.top.E+p.top.S+p.top.G, rem = left(p)-t;
       d.innerHTML = `<div class="who"><span class="nm" style="color:${PCOL[p.i]}">${esc(p.name)}</span></div><div class="num" style="font-size:16px">남은 예산 ${rem}억</div>
-        ${left(p)>0?`<div class="tu">${AREAS.map(a=>`<div class="c"><button class="step" data-a="${a}" data-d="-10" aria-label="${esc(p.name)} ${AREA[a].name} 10억 줄이기">−</button><b style="color:${AREA[a].color}">${a} ${p.top[a]}</b><button class="step" data-a="${a}" data-d="10" aria-label="${esc(p.name)} ${AREA[a].name} 10억 늘리기">+</button></div>`).join('')}</div>`:'<p class="why">예산을 모두 썼어요.</p>'}`;
+        ${left(p)>0?`<div class="tu">${AREAS.map(a=>`<div class="c"><button class="step" data-a="${a}" data-d="-5" aria-label="${esc(p.name)} ${AREA[a].name} 5억 줄이기">−</button><b style="color:${AREA[a].color}">${a} ${p.top[a]}</b><button class="step" data-a="${a}" data-d="5" aria-label="${esc(p.name)} ${AREA[a].name} 5억 늘리기">+</button></div>`).join('')}</div>`:'<p class="why">예산을 모두 썼어요.</p>'}`;
       d.querySelectorAll('[data-a]').forEach(b=>b.onclick=()=>{
         const a=b.dataset.a, dd=+b.dataset.d, t=p.top.E+p.top.S+p.top.G;
-        const nv = Math.max(0, p.top[a]+dd); if(dd>0 && t+dd>left(p)) return;
+        const room = left(p)-t, step = dd>0 ? Math.min(dd, room) : dd; if(step===0) return;
+        const nv = Math.max(0, p.top[a]+step);
         p.top[a]=nv; beep('tick'); draw();
       });
     };
